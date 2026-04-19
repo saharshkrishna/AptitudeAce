@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '../api/client';
+import React, { createContext, useContext, ReactNode } from 'react';
 
 interface User { id: string; name: string; email: string; }
 interface AuthContextType {
@@ -10,40 +9,23 @@ interface AuthContextType {
   logout: () => void;
 }
 
+const GUEST_USER: User = { id: 'guest', name: 'Guest', email: 'guest@aptitudeace.app' };
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const user = GUEST_USER;
+  const token = 'guest-token';
 
-  useEffect(() => {
-    const t = localStorage.getItem('token');
-    const u = localStorage.getItem('user');
-    if (t && u) { setToken(t); setUser(JSON.parse(u)); }
-  }, []);
+  const login = async (_email: string, _password: string) => {};
+  const register = async (_name: string, _email: string, _password: string) => {};
+  const logout = () => {};
 
-  const persist = (token: string, user: User) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token); setUser(user);
-  };
-
-  const login = async (email: string, password: string) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    persist(data.token, data.user);
-  };
-
-  const register = async (name: string, email: string, password: string) => {
-    const { data } = await api.post('/auth/register', { name, email, password });
-    persist(data.token, data.user);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token'); localStorage.removeItem('user');
-    setToken(null); setUser(null);
-  };
-
-  return <AuthContext.Provider value={{ user, token, login, register, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
