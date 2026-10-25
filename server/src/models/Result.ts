@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAnswerDetail {
   questionId: string;
+  category: string;
   selected: number | null;
   correct: number;
   isCorrect: boolean;
@@ -23,6 +24,7 @@ export interface IResult extends Document {
 const AnswerDetailSchema = new Schema<IAnswerDetail>(
   {
     questionId: { type: String, required: true },
+    category: { type: String, required: true },
     selected: { type: Number, default: null },
     correct: { type: Number, required: true },
     isCorrect: { type: Boolean, required: true },

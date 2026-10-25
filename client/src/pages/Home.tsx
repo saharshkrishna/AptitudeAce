@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/client';
 
 const CATEGORIES = ['All', 'Quant', 'Logical', 'Verbal'];
 const DIFFICULTIES = ['All', 'easy', 'medium', 'hard'];
@@ -13,6 +14,20 @@ const Home: React.FC = () => {
   const [difficulty, setDifficulty] = useState('All');
   const [limit, setLimit] = useState(10);
 
+  const [stats, setStats] = useState<{streak: number, strongPoints: string[], weakPoints: string[]} | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await api.get('/test/stats');
+        setStats(data);
+      } catch (err) {
+        console.error('Failed to fetch stats', err);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const start = (mode: 'practice' | 'test') => {
     const params = new URLSearchParams({ category, difficulty, limit: String(limit), mode });
     navigate(`/${mode}?${params.toString()}`);
@@ -22,8 +37,43 @@ const Home: React.FC = () => {
     <div style={{ minHeight: '100vh' }}>
       <div className="page" style={{ justifyContent: 'flex-start', paddingTop: '3rem' }}>
         <div className="card card-wide">
-          <h1 className="title">Hey, {user?.name?.split(' ')[0]} 👋</h1>
-          <p className="subtitle">Choose your session settings and start practising</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1 className="title">Hey, {user?.name?.split(' ')[0]} 👋</h1>
+              <p className="subtitle">Choose your session settings and start practising</p>
+            </div>
+            {stats && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end', color: 'var(--yellow)' }}>
+                  🔥 {stats.streak} Day Streak
+                </div>
+              </div>
+            )}
+          </div>
+
+          {stats && (stats.strongPoints.length > 0 || stats.weakPoints.length > 0) && (
+            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: '8px' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Your Performance Insights</h3>
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                {stats.strongPoints.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--muted)', display: 'block', marginBottom: '0.25rem' }}>💪 Strong Points</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {stats.strongPoints.map(c => <span key={c} className={`badge badge-${c.toLowerCase()}`}>{c}</span>)}
+                    </div>
+                  </div>
+                )}
+                {stats.weakPoints.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--muted)', display: 'block', marginBottom: '0.25rem' }}>🎯 Needs Practice</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {stats.weakPoints.map(c => <span key={c} className={`badge badge-${c.toLowerCase()}`}>{c}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
