@@ -17,6 +17,7 @@ interface ResultData {
   accuracy: number;
   timeTaken: number;
   questions: QuestionResult[];
+  mode?: string;
 }
 
 const Result: React.FC = () => {
@@ -29,7 +30,7 @@ const Result: React.FC = () => {
     return null;
   }
 
-  const { score, total, accuracy, timeTaken, questions } = result;
+  const { score, total, accuracy, timeTaken, questions, mode } = result;
   const mins = Math.floor(timeTaken / 60);
   const secs = timeTaken % 60;
   const wrong = total - score;
@@ -38,6 +39,10 @@ const Result: React.FC = () => {
     : accuracy >= 60 ? { label: 'Good Job! 👍', color: '#a5b4fc' }
     : { label: 'Keep Practising 💪', color: 'var(--yellow)' };
 
+  const avatarMessage = accuracy >= 80 ? "AptiBot here! Fantastic performance on this test! You have a strong grasp of the material."
+    : accuracy >= 60 ? "AptiBot says: Good effort! You're getting there. Review the explanations below to improve your weak areas."
+    : "AptiBot says: Don't give up! Tests can be tough. Take your time to review the incorrect answers below, and practice more to build your skills.";
+
   return (
     <div style={{ minHeight: '100vh' }}>
       <div className="page" style={{ justifyContent: 'flex-start', paddingTop: '2rem' }}>
@@ -45,6 +50,19 @@ const Result: React.FC = () => {
           {/* Grade */}
           <h1 className="title text-center" style={{ color: grade.color }}>{grade.label}</h1>
           <p className="text-muted text-center" style={{ marginBottom: '1.5rem' }}>Here's how you did</p>
+
+          {/* Evaluator Avatar (Test Mode Only) */}
+          {(!mode || mode === 'test') && (
+            <div style={{ marginBottom: '2rem', padding: '1rem', background: 'var(--surface2)', borderRadius: '8px', display: 'flex', gap: '1.5rem', alignItems: 'center', borderLeft: '4px solid var(--accent)' }}>
+              <div style={{ fontSize: '3rem' }}>🤖</div>
+              <div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--accent)', fontWeight: 600 }}>Test Evaluator</h3>
+                <p style={{ margin: 0, lineHeight: 1.5, color: 'var(--text)' }}>
+                  {avatarMessage}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="stats-grid">

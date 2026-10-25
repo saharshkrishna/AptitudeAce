@@ -29,6 +29,7 @@ const Practice: React.FC = () => {
   const [error, setError] = useState('');
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [startTime] = useState(Date.now());
+  const [showAvatarHelp, setShowAvatarHelp] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -76,6 +77,7 @@ const Practice: React.FC = () => {
       setCurrent(c => c + 1);
       setSelected(null);
       setRevealed(false);
+      setShowAvatarHelp(false);
     } else {
       try {
         const timeTaken = Math.round((Date.now() - startTime) / 1000);
@@ -149,21 +151,44 @@ const Practice: React.FC = () => {
             })}
           </div>
 
-          <div className="practice-actions">
+          <div className="practice-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             {!revealed ? (
-              <button
-                className="btn btn-primary"
-                onClick={handleReveal}
-                disabled={selected === null}
-              >
-                Check Answer
-              </button>
+              <>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleReveal}
+                  disabled={selected === null}
+                >
+                  Check Answer
+                </button>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => setShowAvatarHelp(true)}
+                >
+                  🤖 Ask AptiBot for a Hint
+                </button>
+              </>
             ) : (
               <button className="btn btn-primary" onClick={handleNext}>
                 {current < total - 1 ? 'Next Question →' : 'See Results'}
               </button>
             )}
           </div>
+
+          {/* Avatar Hint Overlay (if requested before revealing) */}
+          {showAvatarHelp && !revealed && (
+            <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--surface2)', borderRadius: '8px', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <div style={{ fontSize: '2rem' }}>🤖</div>
+              <div>
+                <p style={{ fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--accent)' }}>AptiBot says:</p>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text)' }}>
+                  Here is a hint based on the explanation: <br/>
+                  <em>{q?.explanation}</em>
+                </p>
+                <button className="btn btn-sm btn-outline" style={{ marginTop: '0.5rem' }} onClick={() => setShowAvatarHelp(false)}>Thanks, got it!</button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* RIGHT: Explanation panel */}
